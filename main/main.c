@@ -73,6 +73,13 @@ void oled_task(void *p) {
                     gfx_draw_line(&disp, 15, 25, distance, 25);
                     gfx_show(&disp);
                     vTaskDelay(pdMS_TO_TICKS(50));
+            }else{
+                gfx_clear_buffer(&disp);
+                gfx_draw_string(&disp, 0, 0, 1, "ERRO (FALTA DE DADOS)");
+                gfx_draw_line(&disp, 0, 25, 128, 25);
+                gfx_show(&disp);
+                vTaskDelay(pdMS_TO_TICKS(50));
+            
             }
         }
     }
@@ -146,7 +153,7 @@ void echo_sensor() {
             xQueueSend(xQueue_distance, &distance, 0);
             printf("Distancia: %.2f cm\n", distance);
         }else{
-            printf("Sem dados\n");
+            printf("Sem dados\n");            
         }
     
     }
