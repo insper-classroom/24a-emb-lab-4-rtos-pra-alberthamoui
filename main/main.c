@@ -80,20 +80,19 @@ void oled_task(void *p) {
 
 
 void pin_callback(uint gpio, uint32_t events) {
-    if (gpio == ECHO_PIN) {
-        static uint32_t start_time;
-        static uint32_t end_time;
-
-        if (gpio_get(ECHO_PIN)) {
-            start_time = to_us_since_boot(get_absolute_time());
-        } else {
-            end_time = to_us_since_boot(get_absolute_time());
-            uint64_t duration = end_time - start_time;
-            xQueueSendFromISR(xQueue_time, &duration, 0);
+    static uint32_t echo_rise_time, echo_fall_time, dt;
+    if(events == 0x8) {  // rise edge
+        if (gpio == ECHO_PIN) {
+            echo_rise_time = to_us_since_boot(get_absolute_time());
         }
-    }
+    } else if (events == 0x4) { // fall edge
+        if (gpio == ECHO_PIN) {
+            echo_fall_time = to_us_since_boot(get_absolute_time());
+            dt = echo_fall_time-echo_rise_time;
+            xQueueSendFromISR(xQueue_time, &dt, 0);
+        }
+    } 
 }
-
 
 void send_pulse(){
     gpio_put(TRIG_PIN, 1);
